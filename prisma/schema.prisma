@@ -1,0 +1,54 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  email String @unique
+  hash  String
+
+  firstName String?
+  lastName  String?
+  bookmarks Bookmark[]
+
+  // @map helps decouple the name given or defined on the model field from the name defined on the actual database table column.
+  // @@map does same but for model name; it helps you define a different name for your actual database table.
+  @@map("users")
+}
+
+model Bookmark {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  title       String
+  description String?
+  link        String
+
+  // Relation - bookmark belongs to user
+  // Link each bookmark to a specific user
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  @@map("bookmarks")
+}
+
+// Automate postgres restart & prisma migrations
+// "prisma:dev:deploy": "prisma migrate deploy",
+// "db:dev:rm": "docker compose rm dev-db -s -f -v",
+// "db:dev:up": "docker compose up dev-db -d",
+// "db:dev:restart": "npm run db:dev:rm && npm run db:dev:up && node -e \"setTimeout(()=>{}, 2000)\" && npm run prisma:dev:deploy",
